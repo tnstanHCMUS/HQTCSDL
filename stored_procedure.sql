@@ -1,3 +1,4 @@
+-- SP_ThongKeKho
 CREATE PROCEDURE sp_ThongKeKho
     @NgayThongKe DATE
 AS
@@ -52,10 +53,89 @@ BEGIN
     -- Kiểm tra nếu có lỗi xảy ra, thực hiện rollback
     IF @@ERROR <> 0
     BEGIN
-        ROLLBACK TRANSACTION;
-        RETURN;
+        ROLLBACK TRANSACTION
+        RETURN
     END
 
     -- Commit transaction nếu không có lỗi
-    COMMIT TRANSACTION;
+    COMMIT TRANSACTION
+END
+--SP_DatHang
+CREATE PROCEDURE sp_DatHang
+AS
+BEGIN
+    -- Bắt đầu giao dịch
+    BEGIN TRANSACTION
+
+    -- Thiết lập ISOLATION LEVEL cho toàn bộ giao dịch
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE -- Đảm bảo tính toàn vẹn dữ liệu và tránh tranh chấp
+
+    -- Khai báo con trỏ để duyệt qua các sản phẩm trong KhoHang
+    DECLARE product_cursor CURSOR LOCAL FORWARD_ONLY READ_ONLY FOR
+    SELECT MA_SANPHAM, SOLUONG_CONLAI, SOLUONG_TOIDA
+    FROM KHOHANG WITH (TABLOCKX) -- Khóa bảng để đảm bảo không có thay đổi song song
+
+    -- Biến để lưu trữ thông tin sản phẩm từ con trỏ
+    DECLARE @MA_SANPHAM INT, @SOLUONG_CONLAI INT, @SOLUONG_TOIDA INT
+
+    -- Mở con trỏ
+    OPEN product_cursor
+
+    -- Lặp qua từng sản phẩm
+    FETCH NEXT FROM product_cursor INTO @MA_SANPHAM, @SOLUONG_CONLAI, @SOLUONG_TOIDA;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- 1.2: Sử dụng sp_ThongKeKho để lấy số lượng chưa giao của sản phẩm
+        DECLARE @SoLuongChuaGiao INT
+		DECLARE @Ngay DATE
+		SET @Ngay = GETDATE()
+        EXEC sp_ThongKeKho @NgayThongKe = @Ngay
+
+        -- Lấy số lượng chưa giao từ bảng ChiTiet_ThongKe_Kho_HangNgay
+        SELECT @SoLuongChuaGiao = SOLUONG_CONNO
+        FROM ChiTiet_ThongKe_Kho_HangNgay WITH (ROWLOCK)
+        WHERE MA_SANPHAM = @MA_SANPHAM AND THOIGIAN_THONGKE = GETDATE()
+
+        -- 1.3: Lọc sản phẩm có số lượng tồn kho thấp hơn ngưỡng 70%
+        IF @SOLUONG_CONLAI < 0.7 * @SOLUONG_TOIDA
+        BEGIN
+            -- 1.4: Tính số lượng cần đặt
+            DECLARE @SoLuongDat INT;
+            SET @SoLuongDat = @SOLUONG_TOIDA - @SOLUONG_CONLAI - ISNULL(@SoLuongChuaGiao, 0)
+
+            IF @SoLuongDat >= 0.1 * @SOLUONG_TOIDA
+            BEGIN
+                -- 1.5: Tạo đơn đặt hàng mới
+                DECLARE @DonDatHangID INT;
+                INSERT INTO DonDatHang (NGAYDATHANG, MA_NHASANXUAT, TINHTRANG)
+                VALUES (GETDATE(),
+                        (SELECT TOP 1 NSX.MA_NHASANXUAT FROM NHASANXUAT NSX JOIN SANPHAM SP ON NSX.MA_NHASANXUAT = SP.MA_NHASANXUAT  WHERE SP.MA_SANPHAM = @MA_SANPHAM), -- Lấy nhà cung cấp từ NCC
+                        N'Chưa xử lý');
+
+                SET @DonDatHangID = SCOPE_IDENTITY(); -- Lấy ID đơn đặt hàng vừa tạo
+
+                -- 1.6: Ghi nhận chi tiết đơn đặt hàng
+                INSERT INTO CHITIET_DONDATHANG (MA_DONDATHANG, MA_SANPHAM, SOLUONG_DATHANG)
+                VALUES (@DonDatHangID, @MA_SANPHAM, @SoLuongDat);
+            END
+        END
+
+        -- Lấy sản phẩm tiếp theo trong con trỏ
+        FETCH NEXT FROM product_cursor INTO @MA_SANPHAM, @SOLUONG_CONLAI, @SOLUONG_TOIDA;
+    END
+
+    -- Đóng và giải phóng con trỏ
+    CLOSE product_cursor
+    DEALLOCATE product_cursor
+
+    -- Kiểm tra nếu có lỗi và rollback nếu cần
+    IF @@ERROR <> 0
+    BEGIN
+        ROLLBACK TRANSACTION
+        RETURN
+    END
+
+    -- Commit giao dịch
+    COMMIT TRANSACTION
 END
