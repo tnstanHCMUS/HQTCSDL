@@ -184,3 +184,71 @@ BEGIN
     COMMIT TRANSACTION;
 END
 GO
+
+-- Thêm sản phẩm vào kho hàng, cập nhật lại số lượng tồn kho trong kho hàng, thống kê vào bảng ChiTiet_ThongKe_Kho_HangNgay và gọi sp_XuLyDonDatHang để cập nhật lại số lượng đã giao chuyển đổi tình trạng của đơn đó là "Đã xử lý" hay chưa.
+USE QLITHONGTINHETHONGSIEUTHI
+GO
+
+CREATE PROCEDURE sp_ThemSanPhamVaoKho
+    @MaSanPham CHAR(10),
+    @SoLuongNhap INT,
+    @NgayNhap DATE
+AS
+BEGIN
+    -- Thiết lập TRANSACTION để đảm bảo tính toàn vẹn dữ liệu
+    BEGIN TRANSACTION;
+
+    -- Thiết lập mức độ ISOLATION để tránh tranh chấp dữ liệu
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+    -- Khai báo biến
+    DECLARE @SoLuongConLai INT
+
+    -- 1.1 Đọc thông tin sản phẩm từ bảng KhoHang
+    -- Khóa các dòng để tránh tranh chấp khi đọc và cập nhật
+    SELECT @SoLuongConLai = SoLuong_ConLai
+    FROM KHOHANG WITH (HOLDLOCK, ROWLOCK)
+    WHERE MA_SANPHAM = @MaSanPham
+
+    -- 1.2 Cập nhật số lượng tồn kho
+    -- Sử dụng UPDLOCK để khóa dòng khi cập nhật
+    UPDATE KHOHANG WITH (UPDLOCK, ROWLOCK)
+    SET SoLuong_ConLai = SoLuong_ConLai + @SoLuongNhap
+    WHERE MA_SANPHAM = @MaSanPham
+
+    -- 1.3 Ghi nhận thông tin nhập kho vào bảng ChiTiet_NhapHang
+    -- Sử dụng UPDLOCK để khóa dòng khi ghi nhận thông tin nhập kho
+    UPDATE CHITIET_NHAPHANG WITH (UPDLOCK, ROWLOCK)
+    SET MA_SANPHAM = @MaSanPham,
+        SOLUONG_NHAPHANG = @SoLuongNhap
+    WHERE MA_SANPHAM = @MaSanPham
+
+	-- Cập nhật ngày nhập kho vào NHAPHANG
+	UPDATE NHAPHANG WITH (UPDLOCK, ROWLOCK)
+	SET NGAY_NHAPHANG = @NgayNhap
+	FROM CHITIET_NHAPHANG CT 
+	WHERE CT.MA_NHAPHANG = NHAPHANG.MA_NHAPHANG AND CT.MA_SANPHAM = @MaSanPham
+
+    -- 1.4 Cập nhật thông tin thống kê kho vào bảng ChiTiet_ThongKe_Kho_HangNgay
+    -- Cập nhật tồn kho và số lượng cần đặt
+    UPDATE ChiTiet_ThongKe_Kho_HangNgay WITH (UPDLOCK, ROWLOCK)
+    SET SOLUONG_TONKHO = @SoLuongConLai + @SoLuongNhap,
+        ThoiGian_ThongKe = GETDATE(),
+        SoLuong_CanDat = 0
+    WHERE MA_SANPHAM = @MaSanPham
+
+    -- Gọi sp_XuLyDonDatHang để xử lý các đơn hàng bị ảnh hưởng sau khi nhập kho
+    EXEC sp_XuLyDonDatHang @MaSanPham
+
+    -- Kiểm tra lỗi, nếu có rollback giao dịch
+    IF @@ERROR <> 0
+    BEGIN
+        -- Nếu có lỗi, rollback giao dịch
+        ROLLBACK TRANSACTION
+        RETURN
+    END
+
+    -- Commit giao dịch nếu không có lỗi
+    COMMIT TRANSACTION
+END
+GO
