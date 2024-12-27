@@ -207,6 +207,152 @@ INSERT INTO SANPHAM VALUES
 ('SP050', 'DGD5', 'NSX010', N'Bàn ăn gỗ tự nhiên', 600000, N'Bàn ăn gỗ tự nhiên, sang trọng và bền vững', N'Orion', '2024-08-01', '2025-08-01', 50, 45)
 go
 
-select * from SANPHAM
 
+--Trigger kiểm tra ngày bắt đầu và ngày kết thúc khuyến mãi phải
+create trigger TRG_SANPHAM_KHUYENMAI
+on CHUONGTRINH_KHUYENMAI
+for insert
+as
+begin
+    if exists (select * from inserted where THOIGIANBATDAU > THOIGIANKETTHUC)
+    begin
+        rollback
+        raiserror('Ngày bắt đầu khuyến mãi phải nhỏ hơn ngày kết thúc khuyến mãi', 16, 1)
+    end
+end
+go
+
+--INSERT DATA TO CHUONGTRINH_KHUYENMAI
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM001', N'Mùa Xuân Vui Vẻ', N'Flash Sale', N'Kim cương', '2024-01-01', '2024-01-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM002', N'Khuyến Mãi Đầu Năm', N'Flash Sale', N'Bạch Kim', '2024-01-01', '2024-01-10')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM003', N'Tết Nguyên Đán', N'Member Sale', N'Vàng', '2024-01-20', '2024-02-05')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM004', N'Tháng 3 Khuyến Mãi', N'Flash Sale', N'Bạc', '2024-03-01', '2024-03-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM005', N'Giải Cứu Hè', N'Member Sale', N'Đồng', '2024-06-01', '2024-06-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM006', N'Hè Sôi Động', N'Flash Sale', N'Kim cương', '2024-06-10', '2024-06-30')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM007', N'Chào Mừng Quốc Khánh', N'Member Sale', N'Vàng', '2024-09-01', '2024-09-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM008', N'Khuyến Mãi Mùa Thu', N'Flash Sale', N'Bạch Kim', '2024-09-01', '2024-09-30')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM009', N'Tết Trung Thu', N'Member Sale', N'Kim cương', '2024-09-10', '2024-09-25')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM010', N'Black Friday', N'Flash Sale', N'Bạc', '2024-11-22', '2024-11-30')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM011', N'Giáng Sinh Vui Vẻ', N'Member Sale', N'Vàng', '2024-12-01', '2024-12-25')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM012', N'Tiệc Mừng Năm Mới', N'Flash Sale', N'Kim cương', '2024-12-15', '2024-12-31')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM013', N'Mùa Lễ Hội', N'Flash Sale', N'Bạch Kim', '2024-12-01', '2024-12-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM014', N'Khuyến Mãi Sinh Nhật', N'Member Sale', N'Đồng', '2024-07-01', '2024-07-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM015', N'Giải Thưởng Tháng 8', N'Flash Sale', N'Bạc', '2024-08-01', '2024-08-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM016', N'Flash Sale Mùa Xuân', N'Flash Sale', N'Kim cương', '2024-02-01', '2024-02-28')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM017', N'Khuyến Mãi Tết Nguyên Đán', N'Member Sale', N'Vàng', '2024-01-15', '2024-02-10')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM018', N'Mùa Hè Rực Rỡ', N'Flash Sale', N'Đồng', '2024-06-05', '2024-06-25')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM019', N'Khuyến Mãi Mùa Đông', N'Member Sale', N'Bạch Kim', '2024-12-01', '2024-12-20')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM020', N'Flash Sale Giáng Sinh', N'Flash Sale', N'Vàng', '2024-12-10', '2024-12-24')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM021', N'Tết Trung Thu Vui Vẻ', N'Member Sale', N'Kim cương', '2024-09-05', '2024-09-20')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM022', N'Tháng 5 Khuyến Mãi', N'Flash Sale', N'Vàng', '2024-05-01', '2024-05-10')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM023', N'Chào Mừng Mùa Hè', N'Member Sale', N'Kim cương', '2024-05-15', '2024-06-05')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM024', N'Mùa Giáng Sinh', N'Flash Sale', N'Bạc', '2024-12-01', '2024-12-24')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM025', N'Khuyến Mãi Tết', N'Flash Sale', N'Bạch Kim', '2024-01-10', '2024-01-25')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM026', N'Tháng 4 Khuyến Mãi', N'Member Sale', N'Vàng', '2024-04-01', '2024-04-10')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM027', N'Khuyến Mãi Đặc Biệt', N'Flash Sale', N'Đồng', '2024-10-01', '2024-10-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM028', N'Mừng Năm Mới', N'Member Sale', N'Kim cương', '2024-12-05', '2024-12-20')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM029', N'Chào Mừng Tháng 7', N'Flash Sale', N'Bạch Kim', '2024-07-01', '2024-07-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM030', N'Flash Sale Cuối Năm', N'Giảm giá', N'Kim cương', '2024-12-10', '2024-12-25')
+--INSERT DATA TO CHUONGTRINH_KHUYENMAI (Loại KM là Combo Sale)
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM031', N'Combo Sinh Nhật Tháng 6', N'Combo Sale', N'Vàng', '2024-06-10', '2024-06-20')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM032', N'Combo Tết Trung Thu 2024', N'Combo Sale', N'Kim cương', '2024-09-01', '2024-09-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM033', N'Combo Mùa Thu Vàng', N'Combo Sale', N'Bạch Kim', '2024-09-05', '2024-09-25')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM034', N'Combo Giáng Sinh 2024', N'Combo Sale', N'Vàng', '2024-12-10', '2024-12-20')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM035', N'Combo Chào Mừng Mùa Hè', N'Combo Sale', N'Kim cương', '2024-06-01', '2024-06-10')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM036', N'Combo Giảm Giá Sinh Nhật', N'Combo Sale', N'Bạc', '2024-08-15', '2024-08-25')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM037', N'Combo Khuyến Mãi Tháng 7', N'Combo Sale', N'Vàng', '2024-07-05', '2024-07-20')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM038', N'Combo Mùa Đông 2024', N'Combo Sale', N'Bạch Kim', '2024-12-01', '2024-12-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM039', N'Combo Khuyến Mãi Năm Mới', N'Combo Sale', N'Kim cương', '2024-01-01', '2024-01-15')
+INSERT INTO CHUONGTRINH_KHUYENMAI VALUES ('CTKM040', N'Combo Black Friday 2024', N'Combo Sale', N'Bạc', '2024-11-24', '2024-11-30')
+go
+
+select * from CHUONGTRINH_KHUYENMAI
+
+--insert data for table SANPHAM_KHUYENMAI (Flash Sale, Member Sale)
+INSERT INTO SANPHAM_KHUYENMAI (MA_SANPHAM, MA_CHUONGTRINH, MUC_GIAMGIA, SOLUONG_SANPHAM_KHUYENMAI, TINHTRANG)
+VALUES
+  ('SP001', 'CTKM001', 15.5, 200, 'Active'),
+  ('SP002', 'CTKM002', 20.0, 150, 'Active'),
+  ('SP003', 'CTKM003', 10.0, 180, 'Inactive'),
+  ('SP004', 'CTKM004', 30.0, 100, 'Active'),
+  ('SP005', 'CTKM005', 5.0, 250, 'Inactive'),
+  ('SP006', 'CTKM006', 25.0, 300, 'Active'),
+  ('SP007', 'CTKM007', 18.0, 170, 'Active'),
+  ('SP008', 'CTKM008', 40.0, 50, 'Active'),
+  ('SP009', 'CTKM009', 10.0, 120, 'Inactive'),
+  ('SP010', 'CTKM010', 15.0, 275, 'Active'),
+  ('SP011', 'CTKM011', 22.0, 210, 'Inactive'),
+  ('SP012', 'CTKM012', 12.0, 190, 'Active'),
+  ('SP013', 'CTKM013', 28.5, 140, 'Active'),
+  ('SP014', 'CTKM014', 7.0, 260, 'Inactive'),
+  ('SP015', 'CTKM015', 33.0, 180, 'Active'),
+  ('SP016', 'CTKM016', 16.0, 220, 'Active'),
+  ('SP017', 'CTKM017', 20.5, 130, 'Active'),
+  ('SP018', 'CTKM018', 8.5, 230, 'Inactive'),
+  ('SP019', 'CTKM019', 18.0, 260, 'Active'),
+  ('SP020', 'CTKM020', 14.5, 200, 'Active'),
+  ('SP021', 'CTKM021', 10.5, 280, 'Inactive'),
+  ('SP022', 'CTKM022', 11.0, 240, 'Active'),
+  ('SP023', 'CTKM023', 24.0, 190, 'Active'),
+  ('SP024', 'CTKM024', 6.0, 250, 'Inactive'),
+  ('SP025', 'CTKM025', 17.5, 210, 'Active'),
+  ('SP026', 'CTKM026', 9.5, 180, 'Inactive'),
+  ('SP027', 'CTKM027', 19.0, 150, 'Active'),
+  ('SP028', 'CTKM028', 13.0, 220, 'Inactive'),
+  ('SP029', 'CTKM029', 30.0, 100, 'Active'),
+  ('SP030', 'CTKM030', 5.5, 240, 'Inactive'),
+  ('SP031', 'CTKM031', 35.0, 50, 'Active'),
+  ('SP032', 'CTKM032', 17.0, 180, 'Active'),
+  ('SP033', 'CTKM033', 23.0, 160, 'Inactive'),
+  ('SP034', 'CTKM034', 10.0, 250, 'Active'),
+  ('SP035', 'CTKM035', 28.0, 120, 'Active'),
+  ('SP036', 'CTKM036', 14.5, 270, 'Inactive'),
+  ('SP037', 'CTKM037', 21.5, 200, 'Active'),
+  ('SP038', 'CTKM038', 16.5, 220, 'Inactive'),
+  ('SP039', 'CTKM039', 25.0, 250, 'Active'),
+  ('SP040', 'CTKM040', 12.5, 180, 'Active');
+go
+
+INSERT INTO SANPHAM_KHUYENMAI_COMBO (MA_SANPHAM_1, MA_SANPHAM_2, MA_CHUONGTRINH, MUC_GIAMGIA, SOLUONG_SANPHAM_KHUYENMAI, TINHTRANG)
+VALUES
+('SP001', 'SP002', 'CTKM001', 10.0, 150, 'Active'),
+('SP003', 'SP004', 'CTKM002', 15.0, 200, 'Active'),
+('SP005', 'SP006', 'CTKM003', 20.0, 100, 'Inactive'),
+('SP007', 'SP008', 'CTKM004', 5.0, 250, 'Active'),
+('SP009', 'SP010', 'CTKM005', 30.0, 120, 'Inactive'),
+('SP011', 'SP012', 'CTKM006', 12.0, 180, 'Active'),
+('SP013', 'SP014', 'CTKM007', 18.0, 170, 'Active'),
+('SP015', 'SP016', 'CTKM008', 25.0, 130, 'Active'),
+('SP017', 'SP018', 'CTKM009', 10.0, 220, 'Inactive'),
+('SP019', 'SP020', 'CTKM010', 40.0, 140, 'Active');
+go
+
+INSERT INTO PHIEUMUAHANG (MA_PHIEUMUAHANG, GIATRI_PHIEUMUAHANG, NGAYAPDUNG, NGAYHETHAN, TRANGTHAI_PHIEUMUAHANG)
+VALUES
+('PMH0001', 500000, '2024-01-01', '2024-01-31', 'Active'),
+('PMH0002', 300000, '2024-02-01', '2024-02-28', 'Inactive'),
+('PMH0003', 700000, '2024-03-01', '2024-03-31', 'Active'),
+('PMH0004', 600000, '2024-04-01', '2024-04-30', 'Active'),
+('PMH0005', 450000, '2024-05-01', '2024-05-15', 'Inactive'),
+('PMH0006', 800000, '2024-06-01', '2024-06-30', 'Active'),
+('PMH0007', 550000, '2024-07-01', '2024-07-31', 'Active'),
+('PMH0008', 750000, '2024-08-01', '2024-08-31', 'Inactive'),
+('PMH0009', 400000, '2024-09-01', '2024-09-15', 'Active'),
+('PMH0010', 650000, '2024-10-01', '2024-10-31', 'Active'),
+('PMH0011', 550000, '2024-11-01', '2024-11-30', 'Active'),
+('PMH0012', 450000, '2024-12-01', '2024-12-31', 'Inactive'),
+('PMH0013', 700000, '2025-01-01', '2025-01-31', 'Active'),
+('PMH0014', 850000, '2025-02-01', '2025-02-28', 'Active'),
+('PMH0015', 600000, '2025-03-01', '2025-03-31', 'Inactive'),
+('PMH0016', 500000, '2025-04-01', '2025-04-30', 'Active'),
+('PMH0017', 650000, '2025-05-01', '2025-05-15', 'Active'),
+('PMH0018', 400000, '2025-06-01', '2025-06-30', 'Inactive'),
+('PMH0019', 550000, '2025-07-01', '2025-07-31', 'Active'),
+('PMH0020', 750000, '2025-08-01', '2025-08-31', 'Active'),
+('PMH0021', 600000, '2025-09-01', '2025-09-30', 'Inactive'),
+('PMH0022', 450000, '2025-10-01', '2025-10-31', 'Active'),
+('PMH0023', 700000, '2025-11-01', '2025-11-30', 'Active'),
+('PMH0024', 500000, '2025-12-01', '2025-12-15', 'Inactive'),
+('PMH0025', 650000, '2026-01-01', '2026-01-31', 'Active');
+go
 
