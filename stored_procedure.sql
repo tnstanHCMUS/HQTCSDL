@@ -259,6 +259,10 @@ BEGIN
 END
 GO
 
+-- Thêm sản phẩm vào kho hàng, cập nhật lại số lượng tồn kho trong kho hàng, thống kê vào bảng ChiTiet_ThongKe_Kho_HangNgay và gọi sp_XuLyDonDatHang để cập nhật lại số lượng đã giao chuyển đổi tình trạng của đơn đó là "Đã xử lý" hay chưa.
+USE QLITHONGTINHETHONGSIEUTHI
+GO
+
 CREATE PROCEDURE sp_ThemSanPhamVaoKho
     @MaSanPham CHAR(10),
     @SoLuongNhap INT,
