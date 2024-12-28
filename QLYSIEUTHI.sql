@@ -11,7 +11,7 @@ USE QLITHONGTINHETHONGSIEUTHI
 GO
 
 --Phân hạng khách hàng (Kim cương, Bạch Kim, Vàng, Bạc, Đồng, Thân thiết)
-CREATE TABLE PHANHANG
+CREATE TABLE PHANHANG --inserted
 (
 	TEN_PHANHANG NVARCHAR(10),
 	TIENTOITHIEU FLOAT,
@@ -23,7 +23,7 @@ CREATE TABLE PHANHANG
 go
 
 --Khách hàng mua hàng ở siêu thị 
-CREATE TABLE KHACHHANG
+CREATE TABLE KHACHHANG --inserted
 (
 	MA_KHACHHANG CHAR(10),
 	SDT CHAR(10),
@@ -42,8 +42,13 @@ CREATE TABLE KHACHHANG
 	FOREIGN KEY(TEN_PHANHANG) 
 	REFERENCES PHANHANG
 )
+ --thêm thuộc tính tổng chi tiêu của khách hàng trong năm nay
+ALTER TABLE KHACHHANG 
+ADD TONGCHITIEU FLOAT
+go
 
---Nhà sản xuất
+
+--Nhà sản xuất sản phẩm --inserted
 CREATE TABLE NHASANXUAT
 (
 	MA_NHASANXUAT CHAR(10),
@@ -56,7 +61,7 @@ CREATE TABLE NHASANXUAT
 )
 
 
---Mục (danh mục sản phẩm)
+--Mục (danh mục sản phẩm) --inserted
 CREATE TABLE MUC
 (
 	MA_MUC CHAR(10),
@@ -67,7 +72,7 @@ CREATE TABLE MUC
 	PRIMARY KEY (MA_MUC)
 )
 
---Sản phẩm
+--Sản phẩm --inserted
 CREATE TABLE SANPHAM
 (
 	MA_SANPHAM CHAR(10),
@@ -167,7 +172,7 @@ CREATE TABLE CHITIET_NHAPHANG
 )
 
 
---Chương trình khuyến mãi cho từng phân hạng khách hàng
+--Chương trình khuyến mãi cho từng phân hạng khách hàng --inserted
 CREATE TABLE CHUONGTRINH_KHUYENMAI
 (
 	MA_CTKM CHAR(10) ,
@@ -187,7 +192,7 @@ CREATE TABLE CHUONGTRINH_KHUYENMAI
 	REFERENCES PHANHANG
 )
 
---Sản phẩm khuyến mãi cho Flash Sale và Member Sale
+--Sản phẩm khuyến mãi cho Flash Sale và Member Sale --inserted
 CREATE TABLE SANPHAM_KHUYENMAI
 (
 	MA_SANPHAM CHAR(10),
@@ -211,7 +216,7 @@ CREATE TABLE SANPHAM_KHUYENMAI
 )
 
 
---Sản phẩm khuyến mãi cho Combo Sale
+--Sản phẩm khuyến mãi cho Combo Sale --inserted
 CREATE TABLE SANPHAM_KHUYENMAI_COMBO
 (
 	
@@ -234,8 +239,13 @@ CREATE TABLE SANPHAM_KHUYENMAI_COMBO
 	FOREIGN KEY(MA_SANPHAM_2)
 	REFERENCES SANPHAM,
 )
+ALTER TABLE SANPHAM_KHUYENMAI_COMBO
+ADD CONSTRAINT FK_SANPHAM_KHUYENMAI_COMBO_CHUONGTRINH_KHUYENMAI
+FOREIGN KEY(MA_CHUONGTRINH)
+REFERENCES CHUONGTRINH_KHUYENMAI
+go
 
---Phiếu mua hàng
+--Phiếu mua hàng --inserted
 CREATE TABLE PHIEUMUAHANG
 (
 	MA_PHIEUMUAHANG CHAR(10),
