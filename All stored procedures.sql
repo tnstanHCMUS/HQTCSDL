@@ -1,5 +1,97 @@
 USE QLITHONGTINHETHONGSIEUTHI
 GO
+
+--StoredProcedure phụ
+--Cập nhật giá sản phẩm: cập nhật giá sản phẩm theo mã sản phẩm
+CREATE PROCEDURE sp_CapNhatGiaSanPham
+    @MaSanPham CHAR(10),
+    @GiaMoi INT
+AS
+BEGIN
+    -- Bắt đầu giao dịch
+    BEGIN TRANSACTION;
+
+    -- Thiết lập mức độ ISOLATION cho toàn bộ giao dịch
+    SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+    -- Cập nhật giá sản phẩm
+    UPDATE SANPHAM
+    SET GIATIEN = @GiaMoi
+    WHERE MA_SANPHAM = @MaSanPham;
+
+    -- Kiểm tra lỗi, nếu có rollback giao dịch
+    IF @@ERROR <> 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Commit giao dịch nếu không có lỗi
+    COMMIT TRANSACTION;
+END
+GO
+
+--XOA KhachHang: xóa khách hàng theo mã khách hàng
+CREATE PROCEDURE sp_XoaKhachHang
+    @MaKhachHang CHAR(10)
+AS
+BEGIN
+    -- Bắt đầu giao dịch
+    BEGIN TRANSACTION;
+
+    -- Thiết lập mức độ ISOLATION cho toàn bộ giao dịch
+    SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+    -- Xóa khách hàng
+    DELETE FROM KHACHHANG
+    WHERE MA_KHACHHANG = @MaKhachHang;
+
+    -- Kiểm tra lỗi, nếu có rollback giao dịch
+    IF @@ERROR <> 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Commit giao dịch nếu không có lỗi
+    COMMIT TRANSACTION;
+END
+GO
+
+--Xoá khuyến mãi: xóa khuyến mãi theo mã khuyến mãi
+CREATE PROCEDURE sp_XoaKhuyenMai
+    @MaKhuyenMai CHAR(10)
+AS
+BEGIN
+    -- Bắt đầu giao dịch
+    BEGIN TRANSACTION;
+
+    -- Thiết lập mức độ ISOLATION cho toàn bộ giao dịch
+    SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+    --xoá chi tiết khuyến mãi sản phẩm có liên quan
+    DELETE FROM SANPHAM_KHUYENMAI WITH (TABLOCKX)
+    WHERE MA_CHUONGTRINH = @MaKhuyenMai;
+
+    --xoá chi tiết khuyến mãi combo có liên quan
+    DELETE FROM SANPHAM_KHUYENMAI_COMBO WITH (TABLOCKX)
+    WHERE MA_CHUONGTRINH = @MaKhuyenMai;
+
+    --xoá chương trình khuyến mãi
+    DELETE FROM CHUONGTRINH_KHUYENMAI WITH (TABLOCKX)
+    WHERE MA_CTKM = @MaKhuyenMai;
+
+    -- Kiểm tra lỗi, nếu có rollback giao dịch
+    IF @@ERROR <> 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+    COMMIT TRANSACTION;
+END
+GO
+
+
 --Thuận: Bộ phân xử lý đơn hàng
 --Kiểm tra khuyến mãi: kiểm tra một món hay combo sản phẩm có khuyến mãi hay không
 CREATE PROCEDURE sp_KiemTraKhuyenMai @MaSanPham CHAR(10), @Muc_GiamGia FLOAT OUTPUT 
@@ -46,7 +138,7 @@ END;
 GO
 
 --Tạo chi tiết đơn hàng: tạo các chi tiết đơn hàng cho từng sản phẩm trong đơn hàng
-CREATE PROCEDURE sp_TaoChiTietDonHang
+CREATE OR ALTER PROCEDURE sp_TaoChiTietDonHang
     @MaDonHang CHAR(10), -- Mã đơn hàng
     @DanhSachMaSanPham NVARCHAR(MAX) -- Danh sách mã sản phẩm cần mua (cách nhau bởi dấu phẩy vd: 'SP001,SP002,SP003')
 AS
@@ -140,6 +232,11 @@ BEGIN
                 -- Insert into order details with promotion
                 INSERT INTO CHITIET_DONHANG (MA_CTDH, MA_DONHANG, MA_SANPHAM, SOLUONG, GIABAN, GIATRIKHUYENMAI)
                 VALUES (NEWID(), @MaDonHang, @MaSanPham, @SoLuong, @GiaBan, @TongGiaTriKhuyenMai);
+                UPDATE SANPHAM --WITH (UPDLOCK, ROWLOCK)
+SET SoLuong_ConLai = SoLuong_ConLai - @SoLuong
+WHERE MA_SANPHAM = @MaSanPham
+
+
             END;
             ELSE
             BEGIN
@@ -153,11 +250,16 @@ BEGIN
                 -- Insert into order details without promotion
                 INSERT INTO CHITIET_DONHANG (MA_CTDH, MA_DONHANG, MA_SANPHAM, SOLUONG, GIABAN, GIATRIKHUYENMAI)
                 VALUES (NEWID(), @MaDonHang, @MaSanPham, @SoLuong, @GiaBan, 0);
+
+                UPDATE SANPHAM --WITH (UPDLOCK, ROWLOCK)
+                SET SoLuong_ConLai = SoLuong_ConLai - @SoLuong
+                WHERE MA_SANPHAM = @MaSanPham
             END;
 
             FETCH NEXT FROM sp_cursor INTO @MaSanPham, @SoLuong;
         END;
 
+		
         -- Clean up cursor and temporary table
         CLOSE sp_cursor;
         DEALLOCATE sp_cursor;
@@ -175,6 +277,7 @@ BEGIN
     END CATCH;
 END;
 GO
+
 
 --Tạo đơn hàng cho khách hàng: tạo đơn hàng cho khách hàng với các thông tin cần thiết
 CREATE PROCEDURE sp_TaoDonHangChoKhachHang
@@ -346,7 +449,7 @@ END
 GO
 
 --Tự động đặt sản phẩm nếu thiếu và đủ điều kiện đặt
-CREATE PROCEDURE sp_DatHang
+CREATE PROCEDURE sp_DatHang 
 AS
 BEGIN
     -- Bắt đầu giao dịch
@@ -361,7 +464,7 @@ BEGIN
     FROM SANPHAM WITH (TABLOCKX) -- Khóa bảng để đảm bảo không có thay đổi song song
 
     -- Biến để lưu trữ thông tin sản phẩm từ con trỏ
-    DECLARE @MA_SANPHAM INT, @SOLUONG_CONLAI INT, @SOLUONG_TOIDA INT
+    DECLARE @MA_SANPHAM CHAR(10), @SOLUONG_CONLAI INT, @SOLUONG_TOIDA INT
 
     -- Mở con trỏ
     OPEN product_cursor
@@ -539,6 +642,159 @@ END
 GO
 
 --NGÂN: Bộ phận quản lý ngành hàng
+CREATE PROCEDURE sp_CapNhatSoLuongSanPhamKhuyenMai
+    @MaDonHang CHAR(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Temporary table to store relevant details
+    SELECT MA_SANPHAM, SOLUONG
+    INTO #ChiTietDonHang
+    FROM CHITIET_DONHANG
+    WHERE MA_DONHANG = @MaDonHang AND GIATRIKHUYENMAI > 0;
+
+    -- Declare variables for cursor
+    DECLARE @MaSanPham CHAR(10);
+    DECLARE @SoLuong INT;
+
+    -- Cursor declaration
+    DECLARE sp_cursor CURSOR LOCAL FORWARD_ONLY READ_ONLY FOR
+    SELECT MA_SANPHAM, SOLUONG
+    FROM #ChiTietDonHang;
+
+    -- Open the cursor
+    OPEN sp_cursor;
+
+    -- Begin transaction scope
+    BEGIN TRY
+        FETCH NEXT FROM sp_cursor INTO @MaSanPham, @SoLuong;
+
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            BEGIN TRANSACTION;
+
+            -- Check and update the appropriate table
+            IF EXISTS (SELECT 1 FROM SANPHAM_KHUYENMAI WHERE MA_SANPHAM = @MaSanPham)
+            BEGIN
+                UPDATE SANPHAM_KHUYENMAI WITH (ROWLOCK)
+                SET SOLUONG_SANPHAM_KHUYENMAI = SOLUONG_SANPHAM_KHUYENMAI - @SoLuong
+                WHERE MA_SANPHAM = @MaSanPham;
+            END
+            ELSE
+            BEGIN
+                UPDATE SANPHAM_KHUYENMAI_COMBO WITH (ROWLOCK)
+                SET SOLUONG_SANPHAM_KHUYENMAI = SOLUONG_SANPHAM_KHUYENMAI - @SoLuong
+                WHERE MA_SANPHAM_1 = @MaSanPham OR MA_SANPHAM_2 = @MaSanPham;
+            END;
+
+            -- Commit the transaction
+            COMMIT TRANSACTION;
+
+            FETCH NEXT FROM sp_cursor INTO @MaSanPham, @SoLuong;
+        END;
+
+        -- Clean up
+        CLOSE sp_cursor;
+        DEALLOCATE sp_cursor;
+
+        PRINT N'Cập nhật thành công số lượng sản phẩm khuyến mãi.';
+    END TRY
+    BEGIN CATCH
+        -- Rollback if an error occurs
+        IF XACT_STATE() <> 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END;
+
+        -- Close and deallocate the cursor if an error occurs
+        IF CURSOR_STATUS('local', 'sp_cursor') >= 0
+        BEGIN
+            CLOSE sp_cursor;
+            DEALLOCATE sp_cursor;
+        END;
+
+        -- Print the error message
+        PRINT N'Lỗi xảy ra: ' + ERROR_MESSAGE();
+    END CATCH;
+
+    -- Drop the temporary table
+    DROP TABLE #ChiTietDonHang;
+END;
+GO
+
+EXEC sp_CapNhatSoLuongSanPhamKhuyenMai 'DH001';
+GO
+
+--Cập nhật tình trạng chi tiết khuyến mãi
+CREATE PROCEDURE sp_CapNhatTinhTrangChiTietKhuyenMai
+AS
+BEGIN
+    -- Declare variables
+    DECLARE @MaChuongTrinh CHAR(10), @NgayKetThuc DATE;
+
+    -- Cursor to iterate through active promotion
+    DECLARE chuongtrinh_cursor CURSOR LOCAL FORWARD_ONLY READ_ONLY FOR
+    SELECT MA_CTKM, THOIGIANKETTHUC
+    FROM CHUONGTRINH_KHUYENMAI
+
+    OPEN chuongtrinh_cursor;
+
+    FETCH NEXT FROM chuongtrinh_cursor INTO @MaChuongTrinh, @NgayKetThuc;
+
+    -- Iterate over all promotion programs
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        BEGIN TRANSACTION;
+        SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+        -- Check if the promotion program has ended or if any conditions require inactivation
+        IF @NgayKetThuc < GETDATE()
+        BEGIN
+            -- Update the status of the promotion details to 'Inactive' if the program has ended
+            UPDATE SANPHAM_KHUYENMAI
+            SET TINHTRANG = 'Inactive'
+            WHERE MA_CHUONGTRINH = @MaChuongTrinh;
+
+            UPDATE SANPHAM_KHUYENMAI_COMBO
+            SET TINHTRANG = 'Inactive'
+            WHERE MA_CHUONGTRINH = @MaChuongTrinh;
+        END
+        ELSE
+        BEGIN
+            -- If the quantity of promotional products is zero or stock is zero, update status to 'Inactive'
+            UPDATE SANPHAM_KHUYENMAI
+            SET TINHTRANG = 'Inactive'
+            WHERE SOLUONG_SANPHAM_KHUYENMAI = 0
+               OR MA_SANPHAM IN (SELECT MA_SANPHAM FROM SANPHAM WHERE SOLUONG_CONLAI = 0);
+
+            UPDATE SANPHAM_KHUYENMAI_COMBO
+            SET TINHTRANG = 'Inactive'
+            WHERE SOLUONG_SANPHAM_KHUYENMAI = 0
+               OR MA_SANPHAM_1 IN (SELECT MA_SANPHAM FROM SANPHAM WHERE SOLUONG_CONLAI = 0)
+               OR MA_SANPHAM_2 IN (SELECT MA_SANPHAM FROM SANPHAM WHERE SOLUONG_CONLAI = 0);
+        END
+
+        -- Commit the transaction after updating the status
+        COMMIT TRANSACTION;
+
+        -- Fetch the next promotion program
+        FETCH NEXT FROM chuongtrinh_cursor INTO @MaChuongTrinh, @NgayKetThuc;
+    END;
+
+    -- Close and deallocate the cursor
+    CLOSE chuongtrinh_cursor;
+    DEALLOCATE chuongtrinh_cursor;
+
+    PRINT N'Cập nhật tình trạng chi tiết khuyến mãi hoàn tất.';
+END;
+GO
+
+exec sp_CapNhatTinhTrangChiTietKhuyenMai;
+GO
+    
+
+
 
 
 --NHÂN: Bộ phận kinh doanh
@@ -621,12 +877,7 @@ END;
 GO
 
 
-EXEC sp_ThongKeSanPhamDaBanTheoNgay @Ngay = '2024-12-28';
-select * from THONGKE_SANPHAM;
-
-EXEC sp_ThongKeDoanhSoTheoNgay @Ngay = '2024-12-28';
-select * from THONGKE_DOANHSO;
-
 --HUY: Bộ phận chăm sóc khách hàng
+
 
 
