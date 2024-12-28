@@ -417,8 +417,8 @@ GO
 EXEC sp_TaoDonHangChoKhachHang 'KH020', 'PMH0020', 'SP008,SP009,SP010', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
 GO
 
-SELECT * FROM DONHANG
+select* from CHITIET_DONHANG
 
-SELECT * FROM CHITIET_DONHANG
-
+select*from SANPHAM_KHUYENMAI
+select*from SANPHAM_KHUYENMAI_COMBO
 
