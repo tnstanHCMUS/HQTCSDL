@@ -14,56 +14,56 @@ select * from PHANHANG
 go
 
 --50 khách hàng mẫu với data khác nhau ngày sinh, tên, số điện thoại, ngày sinh, ngày đăng ký, Phân hạng, Phân hạng năm trước có thể khác nhau
-INSERT INTO KHACHHANG VALUES ('KH001', '0123456789', N'Nguyễn Văn A', '1999-05-01', '2023-01-01', N'Kim cương', N'Kim cương')
-INSERT INTO KHACHHANG VALUES ('KH002', '0123456769', N'Nguyễn Thị B', '1999-06-02', '2017-01-02', N'Bạch Kim', N'Bạch Kim')
-INSERT INTO KHACHHANG VALUES ('KH003', '0123456788', N'Nguyễn Văn C', '1999-07-03', '2018-02-03', N'Vàng', N'Vàng')
-INSERT INTO KHACHHANG VALUES ('KH004', '0123456787', N'Nguyễn Thị D', '1999-12-04', '2021-01-04', N'Bạc', N'Bạc')
-INSERT INTO KHACHHANG VALUES ('KH005', '0123456786', N'Nguyễn Văn E', '1999-01-05', '2021-05-05', N'Đồng', N'Đồng')
-INSERT INTO KHACHHANG VALUES ('KH006', '0123456785', N'Nguyễn Thị F', '1999-08-06', '2020-09-06', N'Thân thiết', N'Thân thiết')
-INSERT INTO KHACHHANG VALUES ('KH007', '0123456784', N'Nguyễn Văn G', '1999-02-07', '2024-01-07', N'Kim cương', N'Kim cương')
-INSERT INTO KHACHHANG VALUES ('KH008', '0123456783', N'Nguyễn Thị H', '1999-09-08', '2021-01-08', N'Bạch Kim', N'Bạch Kim')
-INSERT INTO KHACHHANG VALUES ('KH009', '0123456782', N'Nguyễn Văn I', '1999-09-09', '2022-01-09', N'Vàng', N'Vàng')
-INSERT INTO KHACHHANG VALUES ('KH010', '0123456781', N'Nguyễn Thị K', '1999-03-10', '2021-01-10', N'Bạc', N'Bạc')
-INSERT INTO KHACHHANG VALUES ('KH011', '0123456780', N'Nguyễn Văn L', '1999-01-11', '2021-01-11', N'Đồng', N'Đồng')
-INSERT INTO KHACHHANG VALUES ('KH012', '0123456779', N'Nguyễn Thị M', '1999-04-12', '2022-01-12', N'Thân thiết', N'Thân thiết')
-INSERT INTO KHACHHANG VALUES ('KH013', '0123456778', N'Nguyễn Văn N', '1999-08-13', '2021-01-13', N'Kim cương', N'Vàng')
-INSERT INTO KHACHHANG VALUES ('KH014', '0123456777', N'Nguyễn Thị O', '1999-11-14', '2021-01-14', N'Bạch Kim', N'Bạc')
-INSERT INTO KHACHHANG VALUES ('KH015', '0123456776', N'Nguyễn Văn P', '1999-12-15', '2021-01-15', N'Vàng', N'Đồng')
-INSERT INTO KHACHHANG VALUES ('KH016', '0123456775', N'Nguyễn Thị Q', '1999-10-16', '2021-08-16', N'Bạc', N'Thân thiết')
-INSERT INTO KHACHHANG VALUES ('KH017', '0123456774', N'Nguyễn Văn R', '1999-10-17', '2025-01-17', N'Đồng', N'Kim cương')
-INSERT INTO KHACHHANG VALUES ('KH018', '0123456773', N'Nguyễn Thị S', '1999-09-18', '2023-10-18', N'Thân thiết', N'Bạch Kim')
-INSERT INTO KHACHHANG VALUES ('KH019', '0123456772', N'Nguyễn Văn T', '1999-08-19', '2018-12-19', N'Kim cương', N'Vàng')
-INSERT INTO KHACHHANG VALUES ('KH020', '0123456771', N'Nguyễn Thị U', '1999-07-20', '2023-01-20', N'Bạch Kim', N'Bạc')
-INSERT INTO KHACHHANG VALUES ('KH021', '0123456770', N'Nguyễn Văn V', '1999-01-21', '2021-01-21', N'Vàng', N'Đồng')
-INSERT INTO KHACHHANG VALUES ('KH022', '0123456769', N'Nguyễn Thị W', '1999-06-22', '2021-01-22', N'Bạc', N'Thân thiết')
-INSERT INTO KHACHHANG VALUES ('KH023', '0123456768', N'Nguyễn Văn X', '1999-05-23', '2023-03-23', N'Đồng', N'Kim cương')
-INSERT INTO KHACHHANG VALUES ('KH024', '0123456767', N'Nguyễn Thị Y', '1999-04-24', '2021-01-24', N'Thân thiết', N'Bạch Kim')
-INSERT INTO KHACHHANG VALUES ('KH025', '0123456766', N'Nguyễn Văn Z', '1999-01-25', '2024-01-25', N'Kim cương', N'Vàng')
-INSERT INTO KHACHHANG VALUES ('KH026', '0123456765', N'Nguyễn Thị A1', '1999-03-26', '2021-07-26', N'Bạch Kim', N'Bạc')
-INSERT INTO KHACHHANG VALUES ('KH027', '0123456764', N'Nguyễn Văn B1', '1999-05-27', '2021-01-27', N'Vàng', N'Đồng')
-INSERT INTO KHACHHANG VALUES ('KH028', '0123456763', N'Nguyễn Thị C1', '1999-04-28', '2024-01-28', N'Bạc', N'Thân thiết')
-INSERT INTO KHACHHANG VALUES ('KH029', '0123456762', N'Nguyễn Văn D1', '1999-01-29', '2021-08-29', N'Đồng', N'Kim cương')
-INSERT INTO KHACHHANG VALUES ('KH030', '0123456761', N'Nguyễn Thị E1', '1999-03-30', '2021-01-30', N'Thân thiết', N'Bạch Kim')
-INSERT INTO KHACHHANG VALUES ('KH031', '0123456760', N'Nguyễn Văn F1', '1999-03-31', '2021-05-01', N'Kim cương', N'Vàng')
-INSERT INTO KHACHHANG VALUES ('KH032', '0123456759', N'Nguyễn Thị G1', '1999-03-22', '2022-01-18', N'Bạch Kim', N'Bạc')
-INSERT INTO KHACHHANG VALUES ('KH033', '0123456758', N'Nguyễn Văn H1', '1999-03-13', '2021-01-30', N'Vàng', N'Đồng')
-INSERT INTO KHACHHANG VALUES ('KH034', '0123456757', N'Nguyễn Thị I1', '1999-01-14', '2016-01-12', N'Bạc', N'Thân thiết')
-INSERT INTO KHACHHANG VALUES ('KH035', '0123456756', N'Nguyễn Văn K1', '1999-06-05', '2022-02-01', N'Đồng', N'Kim cương')
-INSERT INTO KHACHHANG VALUES ('KH036', '0123456755', N'Nguyễn Thị L1', '1999-01-26', '2012-01-12', N'Thân thiết', N'Bạch Kim')
-INSERT INTO KHACHHANG VALUES ('KH037', '0123456754', N'Nguyễn Văn M1', '1999-01-17', '2021-05-30', N'Kim cương', N'Vàng')
-INSERT INTO KHACHHANG VALUES ('KH038', '0123456753', N'Nguyễn Thị N1', '1999-06-28', '2021-05-08', N'Bạch Kim', N'Bạc')
-INSERT INTO KHACHHANG VALUES ('KH039', '0123456752', N'Nguyễn Văn O1', '1999-04-09', '2021-01-13', N'Vàng', N'Đồng')
-INSERT INTO KHACHHANG VALUES ('KH040', '0123456751', N'Nguyễn Thị P1', '1999-01-10', '2021-06-25', N'Bạc', N'Thân thiết')
-INSERT INTO KHACHHANG VALUES ('KH041', '0123456750', N'Nguyễn Văn Q1', '1999-01-21', '2021-01-30', N'Đồng', N'Kim cương')
-INSERT INTO KHACHHANG VALUES ('KH042', '0123456749', N'Nguyễn Thị R1', '1999-03-02', '2021-01-13', N'Thân thiết', N'Bạch Kim')
-INSERT INTO KHACHHANG VALUES ('KH043', '0123456748', N'Nguyễn Văn S1', '1999-02-23', '2021-11-15', N'Kim cương', N'Vàng')
-INSERT INTO KHACHHANG VALUES ('KH044', '0123456747', N'Nguyễn Thị T1', '1999-02-14', '2021-10-22', N'Bạch Kim', N'Bạc')
-INSERT INTO KHACHHANG VALUES ('KH045', '0123456746', N'Nguyễn Văn U1', '1999-02-25', '2021-01-24', N'Vàng', N'Đồng')
-INSERT INTO KHACHHANG VALUES ('KH046', '0123456745', N'Nguyễn Thị V1', '1999-02-16', '2021-12-16', N'Bạc', N'Thân thiết')
-INSERT INTO KHACHHANG VALUES ('KH047', '0123456744', N'Nguyễn Văn W1', '1999-07-07', '2021-01-26', N'Đồng', N'Kim cương')
-INSERT INTO KHACHHANG VALUES ('KH048', '0123456743', N'Nguyễn Thị X1', '1999-07-18', '2021-08-21', N'Thân thiết', N'Bạch Kim')
-INSERT INTO KHACHHANG VALUES ('KH049', '0123456742', N'Nguyễn Văn Y1', '1999-02-19', '2021-09-29', N'Kim cương', N'Vàng')
-INSERT INTO KHACHHANG VALUES ('KH050', '0123456741', N'Nguyễn Thị Z1', '1999-06-10', '2021-03-31', N'Bạch Kim', N'Bạc')
+INSERT INTO KHACHHANG VALUES ('KH001', '0123456789', N'Nguyễn Văn A', '1999-05-01', '2023-01-01', N'Kim cương', N'Kim cương', 1000000)
+INSERT INTO KHACHHANG VALUES ('KH002', '0123456769', N'Nguyễn Thị B', '1999-06-02', '2017-01-02', N'Bạch Kim', N'Bạch Kim', 500000)
+INSERT INTO KHACHHANG VALUES ('KH003', '0123456788', N'Nguyễn Văn C', '1999-07-03', '2018-02-03', N'Vàng', N'Vàng', 200000)
+INSERT INTO KHACHHANG VALUES ('KH004', '0123456787', N'Nguyễn Thị D', '1999-12-04', '2021-01-04', N'Bạc', N'Bạc', 100000)
+INSERT INTO KHACHHANG VALUES ('KH005', '0123456786', N'Nguyễn Văn E', '1999-01-05', '2021-05-05', N'Đồng', N'Đồng', 50000)
+INSERT INTO KHACHHANG VALUES ('KH006', '0123456785', N'Nguyễn Thị F', '1999-08-06', '2020-09-06', N'Thân thiết', N'Thân thiết', 0)
+INSERT INTO KHACHHANG VALUES ('KH007', '0123456784', N'Nguyễn Văn G', '1999-02-07', '2024-01-07', N'Kim cương', N'Kim cương', 2000000)
+INSERT INTO KHACHHANG VALUES ('KH008', '0123456783', N'Nguyễn Thị H', '1999-09-08', '2021-01-08', N'Bạch Kim', N'Bạch Kim', 1000000)
+INSERT INTO KHACHHANG VALUES ('KH009', '0123456782', N'Nguyễn Văn I', '1999-09-09', '2022-01-09', N'Vàng', N'Vàng', 500000)
+INSERT INTO KHACHHANG VALUES ('KH010', '0123456781', N'Nguyễn Thị K', '1999-03-10', '2021-01-10', N'Bạc', N'Bạc', 200000)
+INSERT INTO KHACHHANG VALUES ('KH011', '0123456780', N'Nguyễn Văn L', '1999-01-11', '2021-01-11', N'Đồng', N'Đồng', 100000)
+INSERT INTO KHACHHANG VALUES ('KH012', '0123456779', N'Nguyễn Thị M', '1999-04-12', '2022-01-12', N'Thân thiết', N'Thân thiết', 50000)
+INSERT INTO KHACHHANG VALUES ('KH013', '0123456778', N'Nguyễn Văn N', '1999-08-13', '2021-01-13', N'Kim cương', N'Vàng', 200000)
+INSERT INTO KHACHHANG VALUES ('KH014', '0123456777', N'Nguyễn Thị O', '1999-11-14', '2021-01-14', N'Bạch Kim', N'Bạc', 100000)
+INSERT INTO KHACHHANG VALUES ('KH015', '0123456776', N'Nguyễn Văn P', '1999-12-15', '2021-01-15', N'Vàng', N'Đồng', 50000)
+INSERT INTO KHACHHANG VALUES ('KH016', '0123456775', N'Nguyễn Thị Q', '1999-10-16', '2021-08-16', N'Bạc', N'Thân thiết', 20000)
+INSERT INTO KHACHHANG VALUES ('KH017', '0123456774', N'Nguyễn Văn R', '1999-10-17', '2025-01-17', N'Đồng', N'Kim cương', 10000)
+INSERT INTO KHACHHANG VALUES ('KH018', '0123456773', N'Nguyễn Thị S', '1999-09-18', '2023-10-18', N'Thân thiết', N'Bạch Kim', 5000)
+INSERT INTO KHACHHANG VALUES ('KH019', '0123456772', N'Nguyễn Văn T', '1999-08-19', '2018-12-19', N'Kim cương', N'Vàng', 2000000)
+INSERT INTO KHACHHANG VALUES ('KH020', '0123456771', N'Nguyễn Thị U', '1999-07-20', '2023-01-20', N'Bạch Kim', N'Bạc', 100000)
+INSERT INTO KHACHHANG VALUES ('KH021', '0123456770', N'Nguyễn Văn V', '1999-01-21', '2021-01-21', N'Vàng', N'Đồng', 5000000)
+INSERT INTO KHACHHANG VALUES ('KH022', '0123456769', N'Nguyễn Thị W', '1999-06-22', '2021-01-22', N'Bạc', N'Thân thiết', 2000000)
+INSERT INTO KHACHHANG VALUES ('KH023', '0123456768', N'Nguyễn Văn X', '1999-05-23', '2023-03-23', N'Đồng', N'Kim cương', 10000000)
+INSERT INTO KHACHHANG VALUES ('KH024', '0123456767', N'Nguyễn Thị Y', '1999-04-24', '2021-01-24', N'Thân thiết', N'Bạch Kim', 500000)
+INSERT INTO KHACHHANG VALUES ('KH025', '0123456766', N'Nguyễn Văn Z', '1999-01-25', '2024-01-25', N'Kim cương', N'Vàng', 200000)
+INSERT INTO KHACHHANG VALUES ('KH026', '0123456765', N'Nguyễn Thị A1', '1999-03-26', '2021-07-26', N'Bạch Kim', N'Bạc', 100000)
+INSERT INTO KHACHHANG VALUES ('KH027', '0123456764', N'Nguyễn Văn B1', '1999-05-27', '2021-01-27', N'Vàng', N'Đồng', 50000000)
+INSERT INTO KHACHHANG VALUES ('KH028', '0123456763', N'Nguyễn Thị C1', '1999-04-28', '2024-01-28', N'Bạc', N'Thân thiết', 2000000)
+INSERT INTO KHACHHANG VALUES ('KH029', '0123456762', N'Nguyễn Văn D1', '1999-01-29', '2021-08-29', N'Đồng', N'Kim cương', 100000)
+INSERT INTO KHACHHANG VALUES ('KH030', '0123456761', N'Nguyễn Thị E1', '1999-03-30', '2021-01-30', N'Thân thiết', N'Bạch Kim', 50000)
+INSERT INTO KHACHHANG VALUES ('KH031', '0123456760', N'Nguyễn Văn F1', '1999-03-31', '2021-05-01', N'Kim cương', N'Vàng', 20000)
+INSERT INTO KHACHHANG VALUES ('KH032', '0123456759', N'Nguyễn Thị G1', '1999-03-22', '2022-01-18', N'Bạch Kim', N'Bạc', 10000)
+INSERT INTO KHACHHANG VALUES ('KH033', '0123456758', N'Nguyễn Văn H1', '1999-03-13', '2021-01-30', N'Vàng', N'Đồng', 500000)
+INSERT INTO KHACHHANG VALUES ('KH034', '0123456757', N'Nguyễn Thị I1', '1999-01-14', '2016-01-12', N'Bạc', N'Thân thiết', 200000)
+INSERT INTO KHACHHANG VALUES ('KH035', '0123456756', N'Nguyễn Văn K1', '1999-06-05', '2022-02-01', N'Đồng', N'Kim cương', 100000)
+INSERT INTO KHACHHANG VALUES ('KH036', '0123456755', N'Nguyễn Thị L1', '1999-01-26', '2012-01-12', N'Thân thiết', N'Bạch Kim', 900000)
+INSERT INTO KHACHHANG VALUES ('KH037', '0123456754', N'Nguyễn Văn M1', '1999-01-17', '2021-05-30', N'Kim cương', N'Vàng', 800000)
+INSERT INTO KHACHHANG VALUES ('KH038', '0123456753', N'Nguyễn Thị N1', '1999-06-28', '2021-05-08', N'Bạch Kim', N'Bạc', 700000)
+INSERT INTO KHACHHANG VALUES ('KH039', '0123456752', N'Nguyễn Văn O1', '1999-04-09', '2021-01-13', N'Vàng', N'Đồng', 600000)
+INSERT INTO KHACHHANG VALUES ('KH040', '0123456751', N'Nguyễn Thị P1', '1999-01-10', '2021-06-25', N'Bạc', N'Thân thiết', 500000)
+INSERT INTO KHACHHANG VALUES ('KH041', '0123456750', N'Nguyễn Văn Q1', '1999-01-21', '2021-01-30', N'Đồng', N'Kim cương', 400000)
+INSERT INTO KHACHHANG VALUES ('KH042', '0123456749', N'Nguyễn Thị R1', '1999-03-02', '2021-01-13', N'Thân thiết', N'Bạch Kim', 300000)
+INSERT INTO KHACHHANG VALUES ('KH043', '0123456748', N'Nguyễn Văn S1', '1999-02-23', '2021-11-15', N'Kim cương', N'Vàng', 200000)
+INSERT INTO KHACHHANG VALUES ('KH044', '0123456747', N'Nguyễn Thị T1', '1999-02-14', '2021-10-22', N'Bạch Kim', N'Bạc', 100000)
+INSERT INTO KHACHHANG VALUES ('KH045', '0123456746', N'Nguyễn Văn U1', '1999-02-25', '2021-01-24', N'Vàng', N'Đồng', 50000)
+INSERT INTO KHACHHANG VALUES ('KH046', '0123456745', N'Nguyễn Thị V1', '1999-02-16', '2021-12-16', N'Bạc', N'Thân thiết', 2000000)
+INSERT INTO KHACHHANG VALUES ('KH047', '0123456744', N'Nguyễn Văn W1', '1999-07-07', '2021-01-26', N'Đồng', N'Kim cương', 1000000)
+INSERT INTO KHACHHANG VALUES ('KH048', '0123456743', N'Nguyễn Thị X1', '1999-07-18', '2021-08-21', N'Thân thiết', N'Bạch Kim', 500000)
+INSERT INTO KHACHHANG VALUES ('KH049', '0123456742', N'Nguyễn Văn Y1', '1999-02-19', '2021-09-29', N'Kim cương', N'Vàng', 2000000)
+INSERT INTO KHACHHANG VALUES ('KH050', '0123456741', N'Nguyễn Thị Z1', '1999-06-10', '2021-03-31', N'Bạch Kim', N'Bạc', 100000)
 go 
 
 select * from KHACHHANG
@@ -355,4 +355,70 @@ VALUES
 ('PMH0024', 500000, '2025-12-01', '2025-12-15', 'Inactive'),
 ('PMH0025', 650000, '2026-01-01', '2026-01-31', 'Active');
 go
+
+--tạo 20 đơn hàng
+EXEC sp_TaoDonHangChoKhachHang 'KH001', 'PMH0001', 'SP001,SP002,SP003', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH002', 'PMH0002', 'SP004,SP005,SP006', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH003', 'PMH0003', 'SP007,SP008,SP009', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH004', 'PMH0004', 'SP010,SP011,SP012', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH005', 'PMH0005', 'SP013,SP014,SP015', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH006', 'PMH0006', 'SP016,SP017,SP018', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH007', 'PMH0007', 'SP019,SP020,SP021', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH008', 'PMH0008', 'SP022,SP023,SP024', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH009', 'PMH0009', 'SP025,SP026,SP027', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH010', 'PMH0010', 'SP028,SP029,SP030', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH011', 'PMH0011', 'SP031,SP032,SP033', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH012', 'PMH0012', 'SP034,SP035,SP036', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH013', 'PMH0013', 'SP037,SP038,SP039', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH014', 'PMH0014', 'SP040,SP041,SP042', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH015', 'PMH0015', 'SP043,SP044,SP045', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH016', 'PMH0016', 'SP046,SP047,SP048', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH017', 'PMH0017', 'SP049,SP050,SP001', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH018', 'PMH0018', 'SP002,SP003,SP004', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH019', 'PMH0019', 'SP005,SP006,SP007', 'Truc tiep', 'Tien mat', 'Chưa thanh toán';
+GO
+
+EXEC sp_TaoDonHangChoKhachHang 'KH020', 'PMH0020', 'SP008,SP009,SP010', 'Online', 'Chuyen khoan', 'Chưa thanh toán';
+GO
+
+SELECT * FROM DONHANG
+
+SELECT * FROM CHITIET_DONHANG
+
 
