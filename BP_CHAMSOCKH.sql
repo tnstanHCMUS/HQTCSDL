@@ -82,6 +82,9 @@ CREATE OR ALTER PROCEDURE sp_TaoPhieuSinhNhat
     @NgayCapPhieu DATE
 AS
 BEGIN
+    -- Bắt đầu giao dịch
+    BEGIN TRANSACTION;
+
     -- Thiết lập mức độ cô lập của giao dịch
     SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 
@@ -96,6 +99,7 @@ BEGIN
         -- 1.1. Nếu phân hạng là "Thân thiết", kết thúc thủ tục
         IF @PhanHangTruoc = N'Thân thiết'
         BEGIN
+            COMMIT TRANSACTION;
             RETURN 1; -- Trả về 1: Không tạo phiếu
         END
 
@@ -114,7 +118,9 @@ BEGIN
             @Ma_KhachHang, @NgayCapPhieu, N'Active', @GiaTriPhieu
         );
 
+        COMMIT TRANSACTION;
         RETURN 0; -- Trả về 0: Tạo phiếu thành công
+
     END TRY
     BEGIN CATCH
         -- Xử lý lỗi nội bộ

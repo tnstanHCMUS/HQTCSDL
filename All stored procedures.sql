@@ -898,7 +898,7 @@ END;
 GO
 
 
---HUY: Bộ phận chăm sóc khách hàng
+-- HUY: Bộ phận chăm sóc khách hàng
 -- STORED PROCEDURE PHỤ
 
 -- Cập nhật tổng tiền mua sắm theo tháng
@@ -1117,59 +1117,56 @@ END;
 GO
 
 
--- Gửi tặng phiếu sinh nhật cho các khách hàng trong tháng đó dựa trên phân hạng năm ngoái
--- Chạy vào ngày đầu tháng tức ngày 01 trước giờ làm việc
-CREATE OR ALTER PROCEDURE sp_GuiQuaSinhNhat
-    @NgayHienTai DATE
+-- Tạo phiếu sinh nhật dựa trên phân hạng năm trước
+-- Ngày cấp phiếu là ngày đầu của tháng sinh
+CREATE OR ALTER PROCEDURE sp_TaoPhieuSinhNhat
+    @Ma_KhachHang CHAR(10), 
+    @NgayCapPhieu DATE
 AS
 BEGIN
     -- Bắt đầu giao dịch
     BEGIN TRANSACTION;
 
-    -- Thiết lập mức cô lập giao dịch
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    -- Thiết lập mức độ cô lập của giao dịch
+    SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 
     BEGIN TRY
-        -- 1. Lọc các khách hàng có tháng sinh trùng với tháng trong @NgayHienTai
-        DECLARE KhachHang_Cursor CURSOR FOR
-        SELECT MA_KHACHHANG
-        FROM KHACHHANG
-        WHERE MONTH(NGAYSINH) = MONTH(@NgayHienTai);
+        -- 1. Kiểm tra phân hạng năm trước trong bảng KhachHang
+        DECLARE @PhanHangTruoc NVARCHAR(50);
 
-        OPEN KhachHang_Cursor;
+        SELECT @PhanHangTruoc = PHANHANG_NAMTRUOC
+        FROM KhachHang WITH (ROWLOCK)
+        WHERE MA_KHACHHANG = @Ma_KhachHang;
 
-        DECLARE @MaKhachHang CHAR(10);
-        DECLARE @Result INT;
-
-        -- Duyệt qua từng khách hàng
-        FETCH NEXT FROM KhachHang_Cursor INTO @MaKhachHang;
-
-        WHILE @@FETCH_STATUS = 0
+        -- 1.1. Nếu phân hạng là "Thân thiết", kết thúc thủ tục
+        IF @PhanHangTruoc = N'Thân thiết'
         BEGIN
-            -- 2. Gọi sp_TaoPhieuSinhNhat để tạo phiếu sinh nhật
-            EXEC @Result = sp_TaoPhieuSinhNhat @MaKhachHang, @NgayHienTai;
+            COMMIT TRANSACTION;
+            RETURN 1; -- Trả về 1: Không tạo phiếu
+        END
 
-            FETCH NEXT FROM KhachHang_Cursor INTO @MaKhachHang;
-        END;
+        -- 1.2. Nếu không phải "Thân thiết", tiếp tục tạo phiếu
+        DECLARE @GiaTriPhieu FLOAT;
 
-        -- Đóng và giải phóng cursor
-        CLOSE KhachHang_Cursor;
-        DEALLOCATE KhachHang_Cursor;
+        -- 1.2.1. Đối chiếu giá trị phiếu từ bảng PhanHang
+        SELECT @GiaTriPhieu = GIATRI_PHIEUTANG
+        FROM PHANHANG WITH (ROWLOCK)
+        WHERE TEN_PHANHANG = @PhanHangTruoc;
 
-        -- Commit giao dịch
+        -- 1.2.2. Tạo bản ghi mới trong bảng PhieuSinhNhat
+        INSERT INTO PhieuSinhNhat WITH (TABLOCK)
+			(MA_KHACHHANG, NGAYPHATHANH, TRANGTHAI_PHIEUSINHNHAT, GIATRIPHIEU)
+        VALUES (
+            @Ma_KhachHang, @NgayCapPhieu, N'Active', @GiaTriPhieu
+        );
+
         COMMIT TRANSACTION;
+        RETURN 0; -- Trả về 0: Tạo phiếu thành công
+
     END TRY
     BEGIN CATCH
-        -- Rollback nếu có lỗi
-        ROLLBACK TRANSACTION;
-
-        -- Hiển thị lỗi
+        -- Xử lý lỗi nội bộ
         THROW;
     END CATCH
 END;
 GO
-
-
-
-
-
