@@ -216,3 +216,48 @@ BEGIN
     COMMIT TRANSACTION
 END
 GO
+CREATE PROCEDURE sp_XuLyDonDatHang
+    @MaDonDatHang CHAR(10)
+AS
+BEGIN
+    -- Thiết lập TRANSACTION để đảm bảo tính toàn vẹn dữ liệu
+    BEGIN TRANSACTION;
+
+    -- Thiết lập mức độ ISOLATION để tránh tranh chấp dữ liệu
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+    -- Khai báo biến
+    DECLARE @TongSoLuongDat INT, @TongSoLuongGiao INT;
+
+    -- 1.1 Đọc thông tin từ DonDatHang và ChiTiet_DonDatHang
+    SELECT 
+        @TongSoLuongDat = SUM(DDH.SOLUONG_DATHANG),
+		@TongSoLuongGiao = SUM(NH.SOLUONG_NHAPHANG)
+    FROM CHITIET_DONDATHANG DDH WITH (HOLDLOCK, ROWLOCK) -- Khóa hàng để tránh thay đổi
+    JOIN CHITIET_NHAPHANG NH WITH (HOLDLOCK, ROWLOCK)
+	ON NH.MA_SANPHAM = DDH.MA_SANPHAM
+	WHERE MA_DONDATHANG = @MaDonDatHang
+	GROUP BY DDH.MA_DONDATHANG
+
+    -- 1.2 So sánh tổng số lượng đặt và giao, cập nhật trạng thái nếu đã xử lý xong
+    IF @TongSoLuongDat = @TongSoLuongGiao
+    BEGIN
+        UPDATE DONDATHANG WITH (UPDLOCK, ROWLOCK) -- Khóa để cập nhật trạng thái
+        SET TINHTRANG = N'Đã xử lý'
+        WHERE MA_DONDATHANG = @MaDonDatHang
+    END
+
+    -- Kiểm tra lỗi, nếu có rollback giao dịch
+    IF @@ERROR <> 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Commit giao dịch nếu không có lỗi
+    COMMIT TRANSACTION;
+END
+GO
+
+exec sp_XuLyDonDatHang @MaDonDatHang = 'DDH001'
+select* from DONDATHANG
