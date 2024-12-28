@@ -274,6 +274,25 @@ END;
 GO
 
 
+-- Xoá khách hàng
+CREATE OR ALTER PROCEDURE sp_XoaKhachHang
+    @MaKhachHang CHAR(10)
+AS
+BEGIN
+    -- Bắt đầu giao dịch
+    BEGIN TRANSACTION;
+
+    -- Thiết lập mức cô lập giao dịch
+    SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+    -- Xoá khách hàng
+    DELETE FROM KHACHHANG WHERE MA_KHACHHANG = 'KH100';
+
+    COMMIT TRANSACTION;
+
+END;
+GO
+
 -- TEST STORED PROCEDURES NẾU CẦN
 
 /*
