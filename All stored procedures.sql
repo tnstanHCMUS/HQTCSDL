@@ -138,7 +138,7 @@ END;
 GO
 
 --Tạo chi tiết đơn hàng: tạo các chi tiết đơn hàng cho từng sản phẩm trong đơn hàng
-CREATE PROCEDURE sp_TaoChiTietDonHang
+CREATE OR ALTER PROCEDURE sp_TaoChiTietDonHang
     @MaDonHang CHAR(10), -- Mã đơn hàng
     @DanhSachMaSanPham NVARCHAR(MAX) -- Danh sách mã sản phẩm cần mua (cách nhau bởi dấu phẩy vd: 'SP001,SP002,SP003')
 AS
@@ -232,6 +232,11 @@ BEGIN
                 -- Insert into order details with promotion
                 INSERT INTO CHITIET_DONHANG (MA_CTDH, MA_DONHANG, MA_SANPHAM, SOLUONG, GIABAN, GIATRIKHUYENMAI)
                 VALUES (NEWID(), @MaDonHang, @MaSanPham, @SoLuong, @GiaBan, @TongGiaTriKhuyenMai);
+                UPDATE SANPHAM --WITH (UPDLOCK, ROWLOCK)
+SET SoLuong_ConLai = SoLuong_ConLai - @SoLuong
+WHERE MA_SANPHAM = @MaSanPham
+
+
             END;
             ELSE
             BEGIN
@@ -245,11 +250,16 @@ BEGIN
                 -- Insert into order details without promotion
                 INSERT INTO CHITIET_DONHANG (MA_CTDH, MA_DONHANG, MA_SANPHAM, SOLUONG, GIABAN, GIATRIKHUYENMAI)
                 VALUES (NEWID(), @MaDonHang, @MaSanPham, @SoLuong, @GiaBan, 0);
+
+                UPDATE SANPHAM --WITH (UPDLOCK, ROWLOCK)
+                SET SoLuong_ConLai = SoLuong_ConLai - @SoLuong
+                WHERE MA_SANPHAM = @MaSanPham
             END;
 
             FETCH NEXT FROM sp_cursor INTO @MaSanPham, @SoLuong;
         END;
 
+		
         -- Clean up cursor and temporary table
         CLOSE sp_cursor;
         DEALLOCATE sp_cursor;
@@ -267,6 +277,7 @@ BEGIN
     END CATCH;
 END;
 GO
+
 
 --Tạo đơn hàng cho khách hàng: tạo đơn hàng cho khách hàng với các thông tin cần thiết
 CREATE PROCEDURE sp_TaoDonHangChoKhachHang

@@ -421,4 +421,4 @@ select* from CHITIET_DONHANG
 
 select*from SANPHAM_KHUYENMAI
 select*from SANPHAM_KHUYENMAI_COMBO
-
+go
