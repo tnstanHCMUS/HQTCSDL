@@ -90,7 +90,7 @@ BEGIN
         DECLARE @PhanHangTruoc NVARCHAR(50);
 
         SELECT @PhanHangTruoc = PHANHANG_NAMTRUOC
-        FROM KhachHang WITH (HOLDLOCK, ROWLOCK)
+        FROM KhachHang WITH (ROWLOCK)
         WHERE MA_KHACHHANG = @Ma_KhachHang;
 
         -- 1.1. Nếu phân hạng là "Thân thiết", kết thúc thủ tục
@@ -104,11 +104,12 @@ BEGIN
 
         -- 1.2.1. Đối chiếu giá trị phiếu từ bảng PhanHang
         SELECT @GiaTriPhieu = GIATRI_PHIEUTANG
-        FROM PHANHANG WITH (HOLDLOCK, ROWLOCK)
+        FROM PHANHANG WITH (ROWLOCK)
         WHERE TEN_PHANHANG = @PhanHangTruoc;
 
         -- 1.2.2. Tạo bản ghi mới trong bảng PhieuSinhNhat
-        INSERT INTO PhieuSinhNhat (MA_KHACHHANG, NGAYPHATHANH, TRANGTHAI_PHIEUSINHNHAT, GIATRIPHIEU)
+        INSERT INTO PhieuSinhNhat WITH (TABLOCK)
+			(MA_KHACHHANG, NGAYPHATHANH, TRANGTHAI_PHIEUSINHNHAT, GIATRIPHIEU)
         VALUES (
             @Ma_KhachHang, @NgayCapPhieu, N'Active', @GiaTriPhieu
         );
@@ -236,7 +237,7 @@ BEGIN
         -- 1. Lọc các khách hàng có tháng sinh trùng với tháng trong @NgayHienTai
         DECLARE KhachHang_Cursor CURSOR FOR
         SELECT MA_KHACHHANG
-        FROM KHACHHANG
+        FROM KHACHHANG WITH (ROWLOCK)
         WHERE MONTH(NGAYSINH) = MONTH(@NgayHienTai);
 
         OPEN KhachHang_Cursor;
