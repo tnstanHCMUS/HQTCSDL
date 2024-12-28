@@ -21,19 +21,19 @@ BEGIN
     -- Truy vấn trực tiếp để tính toán các thông tin tồn kho, cần đặt và còn nợ
     INSERT INTO @ThongKeKho (ProductID, SoLuongTon, SoLuongDat, SoLuongConNo)
     SELECT 
-        KH.MA_SANPHAM,
-        SUM(ISNULL(KH.SOLUONG_CONLAI, 0)) AS SoLuongTon,
+        SP.MA_SANPHAM,
+        SUM(ISNULL(SP.SOLUONG_CONLAI, 0)) AS SoLuongTon,
         ISNULL(SUM(CTDDH.SOLUONG_DATHANG), 0) AS SoLuongDat,
         (ISNULL(SUM(CTDDH.SOLUONG_DATHANG), 0) - ISNULL(SUM(NH.SOLUONG_NHAPHANG), 0)) AS SoLuongConNo
     FROM 
-        KHOHANG KH
-        LEFT JOIN CHITIET_NHAPHANG NH ON NH.MA_SANPHAM = KH.MA_SANPHAM
-        LEFT JOIN CHITIET_DONDATHANG CTDDH ON CTDDH.MA_SANPHAM = KH.MA_SANPHAM
+        SANPHAM SP
+        LEFT JOIN CHITIET_NHAPHANG NH ON NH.MA_SANPHAM = SP.MA_SANPHAM
+        LEFT JOIN CHITIET_DONDATHANG CTDDH ON CTDDH.MA_SANPHAM = SP.MA_SANPHAM
         LEFT JOIN DONDATHANG DDH ON DDH.MA_DONDATHANG = CTDDH.MA_DONDATHANG
     WHERE 
         DDH.NGAYDATHANG = @NgayThongKe AND DDH.TINHTRANG = N'Đang xử lý'
     GROUP BY 
-        KH.MA_SANPHAM;
+        SP.MA_SANPHAM;
 
     -- Cập nhật thông tin thống kê kho vào bảng ChiTiet_ThongKe_Kho_HangNgay
     -- Sử dụng mức khoá ROWLOCK cho câu lệnh UPDATE để chỉ khóa các dòng đang được cập nhật, tránh tranh chấp
@@ -65,125 +65,89 @@ END
 CREATE PROCEDURE sp_DatHang
 AS
 BEGIN
-    -- Bắt đầu giao dịch
-    BEGIN TRANSACTION
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-    -- Thiết lập ISOLATION LEVEL cho toàn bộ giao dịch
-    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE -- Đảm bảo tính toàn vẹn dữ liệu và tránh tranh chấp
+    DECLARE @MA_SANPHAM CHAR(10), @SOLUONG_CONLAI INT, @SOLUONG_TOIDA INT;
+    DECLARE @SoLuongChuaGiao INT, @SoLuongDat INT;
+    DECLARE @DonDatHangID CHAR(10), @NhaSanXuatHienTai CHAR(10), @NhaSanXuatTruoc CHAR(10) = NULL;
 
-    -- Khai báo con trỏ để duyệt qua các sản phẩm trong KhoHang
+    BEGIN TRANSACTION;
+
     DECLARE product_cursor CURSOR LOCAL FORWARD_ONLY READ_ONLY FOR
-    SELECT MA_SANPHAM, SOLUONG_CONLAI, SOLUONG_TOIDA
-    FROM KHOHANG WITH (TABLOCKX) -- Khóa bảng để đảm bảo không có thay đổi song song
+    SELECT MA_SANPHAM, SOLUONG_CONLAI, SOLUONG_TOIDA, MA_NHASANXUAT
+    FROM SANPHAM;
 
-    -- Biến để lưu trữ thông tin sản phẩm từ con trỏ
-    DECLARE @MA_SANPHAM INT, @SOLUONG_CONLAI INT, @SOLUONG_TOIDA INT
-
-    -- Mở con trỏ
-    OPEN product_cursor
-
-    -- Lặp qua từng sản phẩm
-    FETCH NEXT FROM product_cursor INTO @MA_SANPHAM, @SOLUONG_CONLAI, @SOLUONG_TOIDA;
+    OPEN product_cursor;
+    FETCH NEXT FROM product_cursor INTO @MA_SANPHAM, @SOLUONG_CONLAI, @SOLUONG_TOIDA, @NhaSanXuatHienTai;
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-        -- 1.2: Sử dụng sp_ThongKeKho để lấy số lượng chưa giao của sản phẩm
-        DECLARE @SoLuongChuaGiao INT
-		DECLARE @Ngay DATE
-		SET @Ngay = GETDATE()
-        EXEC sp_ThongKeKho @NgayThongKe = @Ngay
-
-        -- Lấy số lượng chưa giao từ bảng ChiTiet_ThongKe_Kho_HangNgay
         SELECT @SoLuongChuaGiao = SOLUONG_CONNO
         FROM ChiTiet_ThongKe_Kho_HangNgay WITH (ROWLOCK)
-        WHERE MA_SANPHAM = @MA_SANPHAM AND THOIGIAN_THONGKE = GETDATE()
+        WHERE MA_SANPHAM = @MA_SANPHAM AND THOIGIAN_THONGKE = CAST(GETDATE() AS DATE);
 
-        -- 1.3: Lọc sản phẩm có số lượng tồn kho thấp hơn ngưỡng 70%
         IF @SOLUONG_CONLAI < 0.7 * @SOLUONG_TOIDA
         BEGIN
-            -- 1.4: Tính số lượng cần đặt
-            DECLARE @SoLuongDat INT;
-            SET @SoLuongDat = @SOLUONG_TOIDA - @SOLUONG_CONLAI - ISNULL(@SoLuongChuaGiao, 0)
+            SET @SoLuongDat = @SOLUONG_TOIDA - @SOLUONG_CONLAI - ISNULL(@SoLuongChuaGiao, 0);
 
             IF @SoLuongDat >= 0.1 * @SOLUONG_TOIDA
             BEGIN
-                -- 1.5: Tạo đơn đặt hàng mới
-                DECLARE @DonDatHangID INT;
-                INSERT INTO DonDatHang (NGAYDATHANG, MA_NHASANXUAT, TINHTRANG)
-                VALUES (GETDATE(),
-                        (SELECT TOP 1 NSX.MA_NHASANXUAT FROM NHASANXUAT NSX JOIN SANPHAM SP ON NSX.MA_NHASANXUAT = SP.MA_NHASANXUAT  WHERE SP.MA_SANPHAM = @MA_SANPHAM), -- Lấy nhà cung cấp từ NCC
-                        N'Chưa xử lý');
+                IF @NhaSanXuatTruoc IS NULL OR @NhaSanXuatTruoc <> @NhaSanXuatHienTai
+                BEGIN
+                    DECLARE @MaxOrderID CHAR(10), @NewOrderID CHAR(10);
+                    SELECT @MaxOrderID = MAX(MA_DONDATHANG) FROM DonDatHang WHERE MA_DONDATHANG LIKE 'DDH%';
 
-                SET @DonDatHangID = SCOPE_IDENTITY(); -- Lấy ID đơn đặt hàng vừa tạo
+                    IF @MaxOrderID IS NULL
+                    BEGIN
+                        SET @NewOrderID = 'DDH001';
+                    END
+                    ELSE
+                    BEGIN
+                        DECLARE @CurrentNumber INT;
+                        SET @CurrentNumber = CAST(SUBSTRING(@MaxOrderID, 4, 3) AS INT) + 1;
+                        SET @NewOrderID = 'DDH' + RIGHT('000' + CAST(@CurrentNumber AS VARCHAR(3)), 3);
+                    END
 
-                -- 1.6: Ghi nhận chi tiết đơn đặt hàng
-                INSERT INTO CHITIET_DONDATHANG (MA_DONDATHANG, MA_SANPHAM, SOLUONG_DATHANG)
-                VALUES (@DonDatHangID, @MA_SANPHAM, @SoLuongDat);
+                    INSERT INTO DonDatHang (MA_DONDATHANG, NGAYDATHANG, MA_NHASANXUAT, TINHTRANG)
+                    VALUES (
+                        @NewOrderID,
+                        GETDATE(),
+                        @NhaSanXuatHienTai,
+                        N'Chưa xử lý'
+                    );
+
+                    SET @DonDatHangID = @NewOrderID;
+                END
+
+                IF NOT EXISTS (
+                    SELECT 1
+                    FROM CHITIET_DONDATHANG
+                    WHERE MA_DONDATHANG = @DonDatHangID AND MA_SANPHAM = @MA_SANPHAM
+                )
+                BEGIN
+                    INSERT INTO CHITIET_DONDATHANG (MA_DONDATHANG, MA_SANPHAM, SOLUONG_DATHANG)
+                    VALUES (@DonDatHangID, @MA_SANPHAM, @SoLuongDat);
+                END
             END
         END
 
-        -- Lấy sản phẩm tiếp theo trong con trỏ
-        FETCH NEXT FROM product_cursor INTO @MA_SANPHAM, @SOLUONG_CONLAI, @SOLUONG_TOIDA;
+        SET @NhaSanXuatTruoc = @NhaSanXuatHienTai;
+
+        FETCH NEXT FROM product_cursor INTO @MA_SANPHAM, @SOLUONG_CONLAI, @SOLUONG_TOIDA, @NhaSanXuatHienTai;
     END
 
-    -- Đóng và giải phóng con trỏ
-    CLOSE product_cursor
-    DEALLOCATE product_cursor
+    CLOSE product_cursor;
+    DEALLOCATE product_cursor;
 
-    -- Kiểm tra nếu có lỗi và rollback nếu cần
-    IF @@ERROR <> 0
-    BEGIN
-        ROLLBACK TRANSACTION
-        RETURN
-    END
+    COMMIT TRANSACTION;
 
-    -- Commit giao dịch
-    COMMIT TRANSACTION
-END
-
--- Để cập nhật trạng thái của đơn đặt hàng là "Đã xử lý" nếu đã giao đủ
-CREATE PROCEDURE sp_XuLyDonDatHang
-    @MaDonDatHang CHAR(10)
-AS
-BEGIN
-    -- Thiết lập TRANSACTION để đảm bảo tính toàn vẹn dữ liệu
-    BEGIN TRANSACTION;
-
-    -- Thiết lập mức độ ISOLATION để tránh tranh chấp dữ liệu
-    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-
-    -- Khai báo biến
-    DECLARE @TongSoLuongDat INT, @TongSoLuongGiao INT;
-
-    -- 1.1 Đọc thông tin từ DonDatHang và ChiTiet_DonDatHang
-    SELECT 
-        @TongSoLuongDat = SUM(DDH.SOLUONG_DATHANG),
-		@TongSoLuongGiao = SUM(NH.SOLUONG_NHAPHANG)
-    FROM CHITIET_DONDATHANG DDH WITH (HOLDLOCK, ROWLOCK) -- Khóa hàng để tránh thay đổi
-    JOIN CHITIET_NHAPHANG NH WITH (HOLDLOCK, ROWLOCK)
-	ON NH.MA_SANPHAM = DDH.MA_SANPHAM
-	WHERE MA_DONDATHANG = @MaDonDatHang
-	GROUP BY DDH.MA_DONDATHANG
-
-    -- 1.2 So sánh tổng số lượng đặt và giao, cập nhật trạng thái nếu đã xử lý xong
-    IF @TongSoLuongDat = @TongSoLuongGiao
-    BEGIN
-        UPDATE DONDATHANG WITH (UPDLOCK, ROWLOCK) -- Khóa để cập nhật trạng thái
-        SET TINHTRANG = N'Đã xử lý'
-        WHERE MA_DONDATHANG = @MaDonDatHang
-    END
-
-    -- Kiểm tra lỗi, nếu có rollback giao dịch
     IF @@ERROR <> 0
     BEGIN
         ROLLBACK TRANSACTION;
         RETURN;
     END
+END;
 
-    -- Commit giao dịch nếu không có lỗi
-    COMMIT TRANSACTION;
-END
-GO
 
 -- Thêm sản phẩm vào kho hàng, cập nhật lại số lượng tồn kho trong kho hàng, thống kê vào bảng ChiTiet_ThongKe_Kho_HangNgay và gọi sp_XuLyDonDatHang để cập nhật lại số lượng đã giao chuyển đổi tình trạng của đơn đó là "Đã xử lý" hay chưa.
 USE QLITHONGTINHETHONGSIEUTHI
@@ -195,7 +159,7 @@ CREATE PROCEDURE sp_ThemSanPhamVaoKho
     @NgayNhap DATE
 AS
 BEGIN
-    -- Thiết lập TRANSACTION để đảm bảo tính toàn vẹn dữ liệu
+-- Thiết lập TRANSACTION để đảm bảo tính toàn vẹn dữ liệu
     BEGIN TRANSACTION;
 
     -- Thiết lập mức độ ISOLATION để tránh tranh chấp dữ liệu
@@ -207,12 +171,12 @@ BEGIN
     -- 1.1 Đọc thông tin sản phẩm từ bảng KhoHang
     -- Khóa các dòng để tránh tranh chấp khi đọc và cập nhật
     SELECT @SoLuongConLai = SoLuong_ConLai
-    FROM KHOHANG WITH (HOLDLOCK, ROWLOCK)
+    FROM SANPHAM WITH (HOLDLOCK, ROWLOCK)
     WHERE MA_SANPHAM = @MaSanPham
 
     -- 1.2 Cập nhật số lượng tồn kho
     -- Sử dụng UPDLOCK để khóa dòng khi cập nhật
-    UPDATE KHOHANG WITH (UPDLOCK, ROWLOCK)
+    UPDATE SANPHAM WITH (UPDLOCK, ROWLOCK)
     SET SoLuong_ConLai = SoLuong_ConLai + @SoLuongNhap
     WHERE MA_SANPHAM = @MaSanPham
 
@@ -238,7 +202,7 @@ BEGIN
     WHERE MA_SANPHAM = @MaSanPham
 
     -- Gọi sp_XuLyDonDatHang để xử lý các đơn hàng bị ảnh hưởng sau khi nhập kho
-    EXEC sp_XuLyDonDatHang @MaSanPham
+    --EXEC sp_XuLyDonDatHang @MaSanPham
 
     -- Kiểm tra lỗi, nếu có rollback giao dịch
     IF @@ERROR <> 0
